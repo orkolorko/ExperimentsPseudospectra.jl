@@ -1,0 +1,7 @@
+name = "ExperimentsPseudospectra"
+uuid = "98de26d4-2930-474f-9e10-a245e04bd315"
+authors = ["Isaia Nisoli"]
+version = "0.0.1-DEV"
+
+[compat]
+julia = "1.1"
