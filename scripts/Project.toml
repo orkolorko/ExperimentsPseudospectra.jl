@@ -1,6 +1,7 @@
 [deps]
 BallArithmetic = "77e4f72b-b5a4-4fb0-ac2a-dcc32095a072"
 ClusterManagers = "34f1f09b-3a8b-5176-ab39-66d58a4d544e"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
 Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 ExperimentsPseudospectra = "98de26d4-2930-474f-9e10-a245e04bd315"
 JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
