@@ -5,6 +5,7 @@ version = "0.0.1-DEV"
 
 [deps]
 BallArithmetic = "77e4f72b-b5a4-4fb0-ac2a-dcc32095a072"
+Distributed = "8ba89e20-285c-5b6f-9357-94700520ee1b"
 IntervalArithmetic = "d1acc4aa-44c8-5952-acd4-ba5d80a2a253"
 JLD = "4138dd39-2aa7-5051-a626-17a0bb65d9c8"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"

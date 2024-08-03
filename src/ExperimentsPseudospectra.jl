@@ -67,7 +67,26 @@ function prepare_and_output(K, filename = "ArnoldMatrixSchur$K.jld")
     end
 end
 
+@inline compute_steps(ρ, r_pearl) = ceil(Int64, (2*pi*ρ)/r_pearl)
 
+function submit_job(λ, ρ, r_pearl, job_queue, N = compute_steps(ρ, r_pearl))
+    @info "N jobs"
+    for i in 0:N
+        put!(job_queue, (λ+ρ*exp(2*pi*im*i/N), r_pearl))
+    end
+    return N
+end
 
+import Distributed
+
+function dowork(P, jobs, results)
+    while true
+        c, r_pearl = take!(jobs)
+        @info c, r_pearl
+        z = BallArithmetic.Ball(c, r_pearl)
+        t = @elapsed Σ = BallArithmetic.svdbox(P-z*LinearAlgebra.I)
+        put!(results, (val = Σ[end], c = c, t = t, id = Distributed.myid()))
+    end
+end
 
 end
