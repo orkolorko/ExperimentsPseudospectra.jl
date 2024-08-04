@@ -82,7 +82,7 @@ import Distributed
 function dowork(P, jobs, results)
     while true
         i, c, r_pearl = take!(jobs)
-        @info c, r_pearl
+        #@info c, r_pearl
         z = BallArithmetic.Ball(c, r_pearl)
         t = @elapsed Σ = BallArithmetic.svdbox(P-z*LinearAlgebra.I)
         put!(results, (i = i, val = Σ[end], second_val = Σ[end-1] , c = c, r_pearl = r_pearl, t = t, id = Distributed.myid()))

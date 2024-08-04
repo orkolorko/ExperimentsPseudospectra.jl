@@ -10,4 +10,4 @@ module load julia
 
 # Run the job with full optimisations. Add in --project="." if you have a
 # Project/Manifest with dependencies
-julia --project="." run.jl
+julia --project="." run_2.jl
