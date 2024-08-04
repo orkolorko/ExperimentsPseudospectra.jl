@@ -1,6 +1,6 @@
 using Distributed, ClusterManagers
 procs = addprocs_slurm(parse(Int, ENV["SLURM_NTASKS"]))
-procs = addprocs(2)
+#procs = addprocs(2)
 
 @everywhere using Pkg; 
 @everywhere Pkg.activate(@__DIR__)
