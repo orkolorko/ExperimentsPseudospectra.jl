@@ -7,32 +7,32 @@ function setup()
     Pkg.instantiate()
 end
 
-import RigorousInvariantMeasures, IntervalArithmetic
+# import RigorousInvariantMeasures, IntervalArithmetic
 
-function build_matrix_arnold(K)
-    function T(x; c)
-        return 2 * x + c * RigorousInvariantMeasures.sinpi(2 * x) +
-        sqrt(IntervalArithmetic.interval(2)) / 2
-    end
-    c = 1 / (2 * IntervalArithmetic.interval(pi)) - 1 / 16
-    FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 32768)
-    P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> T(x; c = c))
-    return P
-end
+# function build_matrix_arnold(K)
+#     function T(x; c)
+#         return 2 * x + c * RigorousInvariantMeasures.sinpi(2 * x) +
+#         sqrt(IntervalArithmetic.interval(2)) / 2
+#     end
+#     c = 1 / (2 * IntervalArithmetic.interval(pi)) - 1 / 16
+#     FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 32768)
+#     P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> T(x; c = c))
+#     return P
+# end
 
 import BallArithmetic
 
-function convert_matrix(P)
-    midI = IntervalArithmetic.mid
-    radI = IntervalArithmetic.radius
-    midP = midI.(real.(P.L)) + im * midI.(imag.(P.L))
-    radP = setrounding(Float64, RoundUp) do
-        return sqrt.(radI.(real.(P.L))^2 + radI.(imag.(P.L))^2)
-    end
-    return BallArithmetic.BallMatrix(midP, radP)
-end
+# function convert_matrix(P)
+#     midI = IntervalArithmetic.mid
+#     radI = IntervalArithmetic.radius
+#     midP = midI.(real.(P.L)) + im * midI.(imag.(P.L))
+#     radP = setrounding(Float64, RoundUp) do
+#         return sqrt.(radI.(real.(P.L))^2 + radI.(imag.(P.L))^2)
+#     end
+#     return BallArithmetic.BallMatrix(midP, radP)
+# end
 
-import LinearAlgebra
+using LinearAlgebra
 
 function compute_schur_and_error(A::BallArithmetic.BallMatrix)
     S = LinearAlgebra.schur(Complex{Float64}.(A.c))
@@ -69,10 +69,10 @@ end
 
 @inline compute_steps(ρ, r_pearl) = ceil(Int64, (2*pi*ρ)/r_pearl)
 
-function submit_job(λ, ρ, r_pearl, job_queue, N = compute_steps(ρ, r_pearl))
-    @info "N jobs"
-    for i in 0:N
-        put!(job_queue, (λ+ρ*exp(2*pi*im*i/N), r_pearl))
+function submit_job(λ, ρ, r_pearl, job_queue; N = compute_steps(ρ, r_pearl), start = 0, stop = N)
+    @info "$(stop-start) jobs"
+    for i in start:stop
+        put!(job_queue, (i, λ+ρ*exp(2*pi*im*i/N), r_pearl))
     end
     return N
 end
@@ -81,11 +81,11 @@ import Distributed
 
 function dowork(P, jobs, results)
     while true
-        c, r_pearl = take!(jobs)
+        i, c, r_pearl = take!(jobs)
         @info c, r_pearl
         z = BallArithmetic.Ball(c, r_pearl)
         t = @elapsed Σ = BallArithmetic.svdbox(P-z*LinearAlgebra.I)
-        put!(results, (val = Σ[end], c = c, t = t, id = Distributed.myid()))
+        put!(results, (i = i, val = Σ[end], second_val = Σ[end-1] , c = c, r_pearl = r_pearl, t = t, id = Distributed.myid()))
     end
 end
 
