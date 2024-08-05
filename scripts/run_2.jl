@@ -1,6 +1,6 @@
-using Distributed, ClusterManagers
-procs = addprocs_slurm(parse(Int, ENV["SLURM_NTASKS"]))
-#procs = addprocs(2)
+using Distributed, ClusterManagers, FileIO
+#procs = addprocs_slurm(parse(Int, ENV["SLURM_NTASKS"]))
+procs = addprocs(2)
 
 @everywhere using Pkg; 
 @everywhere Pkg.activate(@__DIR__)
@@ -36,7 +36,7 @@ Ntot = ExperimentsPseudospectra.compute_steps(ρ, r_pearl)
 @info "$Ntot svd need to be computed"
 
 start = 0
-stop = Ntot
+stop = 1000
 
 @info "Start", start, "stop", stop
 
@@ -47,37 +47,48 @@ foreach(
       workers()
 )
 
-using DataFrames, JLD
-d = DataFrame()
-
+using FileIO, Dates, CSV
 avg_time = 0.0
 N = stop-start
 
 count = 0
 
-@elapsed while N > 0 # print out results
+min_svd = 100
+
+csvfile = "results_$(now())_$(λ)_$(ρ)_$(r_pearl).csv"
+
+tot_time = @elapsed while N > 0 # print out results
       
       x = take!(results)
+
+      sv = setrounding(Float64, RoundDown) do
+                     return x.val_c-x.val_r
+          end
+           
+      global min_svd = min(min_svd, sv)
 
       global avg_time += x.t
       global N = N - 1
       global count+=1
 
-      push!(d, x)
+      CSV.write(csvfile, [x]; append=isfile(csvfile))
 
-      if count % 1000 == 0
+      if count % 10000 == 0
+            @info min_svd
             @info x.t, x.c
             @info count, (avg_time/count*Ntot)/(3600*length(workers()))
             #@info "Done ", (1-Float64(N)/Ntot)*100, "%"
       end 
 end
-save("results.jld", "DataF", d)
+
+@info "The minimum singular value along the curve is" min_svd
 
 avg_time /= stop-start
 
 nworkers = length(procs)
 
 @info "Average time for certifying an SVD", avg_time
+@info "Total time", tot_time
 # #@info "Estimate of time, serial" ceil(
 # #    Int64, (2 * pi * 0.001) / (4.9 * 10^(-9)) * avg_time / 3600) " hours"
 # #@info "Estimate of time, parallel, this configuration" ceil(
