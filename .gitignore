@@ -4,5 +4,6 @@
 /docs/Manifest.toml
 /docs/build/
 *.out
-
+*.jld
+scripts/Manifest.toml
 
