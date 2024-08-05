@@ -58,7 +58,7 @@ function prepare_and_output(K, filename = "ArnoldMatrixSchur$K.jld")
     P = ExperimentsPseudospectra.convert_matrix(ExperimentsPseudospectra.build_matrix_arnold(256))
     S, errF, errT, norm_Z, norm_Z_inv = compute_schur_and_error(P)
     jldopen(filename, "w") do file
-        write(file, "P", P) 
+        write(file, "P", P)
         write(file, "S", S)
         write(file, "errF", errF)
         write(file, "errT", errT)
@@ -67,12 +67,13 @@ function prepare_and_output(K, filename = "ArnoldMatrixSchur$K.jld")
     end
 end
 
-@inline compute_steps(ρ, r_pearl) = ceil(Int64, (2*pi*ρ)/r_pearl)
+@inline compute_steps(ρ, r_pearl) = ceil(Int64, (2 * pi * ρ) / r_pearl)
 
-function submit_job(λ, ρ, r_pearl, job_queue; N = compute_steps(ρ, r_pearl), start = 0, stop = N)
+function submit_job(
+        λ, ρ, r_pearl, job_queue; N = compute_steps(ρ, r_pearl), start = 0, stop = N)
     @info "$(stop-start) jobs"
     for i in start:stop
-        put!(job_queue, (i, λ+ρ*exp(2*pi*im*i/N), r_pearl))
+        put!(job_queue, (i, λ + ρ * exp(2 * pi * im * i / N), r_pearl))
     end
     return N
 end
@@ -84,8 +85,17 @@ function dowork(P, jobs, results)
         i, c, r_pearl = take!(jobs)
         #@info c, r_pearl
         z = BallArithmetic.Ball(c, r_pearl)
-        t = @elapsed Σ = BallArithmetic.svdbox(P-z*LinearAlgebra.I)
-        put!(results, (i = i, val = Σ[end], second_val = Σ[end-1] , c = c, r_pearl = r_pearl, t = t, id = Distributed.myid()))
+        t = @elapsed Σ = BallArithmetic.svdbox(P - z * LinearAlgebra.I)
+        put!(results,
+            (i = i,
+                val_c = Σ[end].c,
+                val_r = Σ[end].r,
+                second_val_c = Σ[end - 1].c,
+                second_val_r = Σ[end - 1].r,
+                c = c,
+                r_pearl = r_pearl,
+                t = t,
+                id = Distributed.myid()))
     end
 end
 
