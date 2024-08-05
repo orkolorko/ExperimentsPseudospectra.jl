@@ -1,6 +1,6 @@
 using Distributed, ClusterManagers
 procs = addprocs_slurm(parse(Int, ENV["SLURM_NTASKS"]))
-procs = addprocs(2)
+#procs = addprocs(2)
 
 @everywhere using Pkg; 
 @everywhere Pkg.activate(@__DIR__)
@@ -35,8 +35,8 @@ r_pearl = (4.9 * 10^(-9))
 Ntot = ExperimentsPseudospectra.compute_steps(ρ, r_pearl)
 @info "$Ntot svd need to be computed"
 
-start = 1000
-stop = 2000
+start = 0
+stop = Ntot
 
 @info "Start", start, "stop", stop
 
@@ -65,13 +65,13 @@ count = 0
 
       push!(d, x)
 
-      if count % 100 == 0
+      if count % 1000 == 0
             @info x.t, x.c
             @info count, (avg_time/count*Ntot)/(3600*length(workers()))
             #@info "Done ", (1-Float64(N)/Ntot)*100, "%"
       end 
 end
-#save("results_$(λ)_$(ρ)_$(r_pearl)_$N_$(start)_$(stop).jld", "DataF", d)
+save("results.jld", "DataF", d)
 
 avg_time /= stop-start
 
