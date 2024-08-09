@@ -6,4 +6,4 @@
 *.out
 *.jld
 scripts/Manifest.toml
-
+*.csv
