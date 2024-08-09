@@ -31,15 +31,25 @@ S = D["S"]
 r_pearl = 6.36351520069046e-7
 λ = 0.0
 
-@info "Certifying ", λ, "radius", ρ, "radius pearl", r_pearl
+@info "Certifying the central circle, with radius $ρ" 
+
+# We will split the circle in sectors, so that when we are near 
+# the eigenvalues, we do a finer work
+
+
+
+
+
+
+
 
 Ntot = ExperimentsPseudospectra.compute_steps(ρ, r_pearl)
 @info "$Ntot svd need to be computed"
 
-start = 0
-stop = 1000
+start_angle = 0
+stop_angle = pi/100
 
-@info "Start", start, "stop", stop
+@info "Start", start_angle, "stop", stop_angle
 
 @async ExperimentsPseudospectra.submit_job(λ, ρ, r_pearl, jobs; start = start, stop = stop)
 
