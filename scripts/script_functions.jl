@@ -1,4 +1,4 @@
-function compute_enclosure_arc(D, λ, ρ, r_pearl; start_angle, stop_angle)
+function compute_enclosure_arc(D, λ, ρ, r_pearl;  csvfile = "", start_angle, stop_angle)
     
     jobs = RemoteChannel(() -> Channel{Tuple}(32))
     results = RemoteChannel(() -> Channel{NamedTuple}(32))
@@ -22,7 +22,10 @@ function compute_enclosure_arc(D, λ, ρ, r_pearl; start_angle, stop_angle)
     count = 0
     min_svd = 100
 
-    csvfile = "results_$(now())_$(λ)_$(ρ)_$(r_pearl)_$(start_angle)_$(stop_angle).csv"
+    if csvfile == ""
+        csvfile = "results_$(now())_$(λ)_$(ρ)_$(r_pearl)_$(start_angle)_$(stop_angle).csv"
+    end
+    
     tot_time = @elapsed while N > 0 # print out results
         x = take!(results)
 
@@ -38,12 +41,12 @@ function compute_enclosure_arc(D, λ, ρ, r_pearl; start_angle, stop_angle)
 
         CSV.write(csvfile, [x]; append = isfile(csvfile))
 
-        if count % 10000 == 0
-            @info min_svd
-            @info x.t, x.c
-            @info count, ((avg_time / count) * Ntot) / (3600 * length(workers()))
-            #@info "Done ", (1-Float64(N)/Ntot)*100, "%"
-        end
+        # if count % 10000 == 0
+        #     @info min_svd
+        #     @info x.t, x.c
+        #     @info count, ((avg_time / count) * Ntot) / (3600 * length(workers()))
+        #     #@info "Done ", (1-Float64(N)/Ntot)*100, "%"
+        # end
     end
 
     @info "The minimum singular value along the arc centered at $(λ), with radius $(ρ), with pearls of size $(r_pearl)"

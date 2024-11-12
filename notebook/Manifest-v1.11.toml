@@ -2,7 +2,7 @@
 
 julia_version = "1.11.1"
 manifest_format = "2.0"
-project_hash = "32a31ffcdb397765d48413c63b40639b2b91a257"
+project_hash = "77ca62c8c73039415ac59384acadbb3c0dde2839"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "eea5d80188827b35333801ef97a40c2ed653b081"
@@ -1661,6 +1661,25 @@ deps = ["Distributed", "Printf"]
 git-tree-sha1 = "8f6bc219586aef8baf0ff9a5fe16ee9c70cb65e4"
 uuid = "92933f4c-e287-5a05-a399-4b506db050ca"
 version = "1.10.2"
+
+[[deps.Pseudospectra]]
+deps = ["Arpack", "LinearAlgebra", "PlotUtils", "Printf", "ProgressMeter", "SparseArrays"]
+git-tree-sha1 = "d24f60f2619f626eec0c12e82b1ebe1cd172db90"
+repo-rev = "master"
+repo-url = "https://github.com/RalphAS/Pseudospectra.jl"
+uuid = "d6c5b33e-0240-5bd5-a771-a97ae748a961"
+version = "0.3.0-DEV"
+
+    [deps.Pseudospectra.extensions]
+    PseudospectraMakie = "Makie"
+    PseudospectraPlots = "Plots"
+    PseudospectraPyPlot = "PyPlot"
+
+    [deps.Pseudospectra.weakdeps]
+    Makie = "ee78f7c6-11fb-53f2-987a-cfe4a2b5a57a"
+    Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
+    PyPlot = "d330b81b-6aea-500a-939a-2ce795aea3ee"
+    Requires = "ae029012-a4dd-5104-9daa-d747884805df"
 
 [[deps.PtrArrays]]
 git-tree-sha1 = "77a42d78b6a92df47ab37e177b2deac405e1c88f"
