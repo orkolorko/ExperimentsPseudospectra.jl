@@ -9,3 +9,4 @@ Manifest.toml
 scripts/Manifest.toml
 *.csv
 *.jld
+settings.json
