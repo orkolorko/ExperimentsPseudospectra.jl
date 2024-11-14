@@ -7,30 +7,47 @@ function setup()
     Pkg.instantiate()
 end
 
-# import RigorousInvariantMeasures, IntervalArithmetic
+import RigorousInvariantMeasures, IntervalArithmetic
 
-# function build_matrix_arnold(K)
-#     function T(x; c)
-#         return 2 * x + c * RigorousInvariantMeasures.sinpi(2 * x) +
-#         sqrt(IntervalArithmetic.interval(2)) / 2
-#     end
-#     c = 1 / (2 * IntervalArithmetic.interval(pi)) - 1 / 16
-#     FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 32768)
-#     P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> T(x; c = c))
-#     return P
-# end
+function build_matrix_arnold(K)
+     function T(x; c)
+         return 2 * x + c * RigorousInvariantMeasures.sinpi(2 * x) +
+         sqrt(IntervalArithmetic.interval(2)) / 2
+     end
+     c = 1 / (2 * IntervalArithmetic.interval(pi)) - 1 / 16
+     FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 32768)
+     P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> T(x; c = c))
+     return P
+end
+
+function build_matrix_Blaschke(K)
+    r = interval(9)/10
+    ϕ = interval(π)/4
+
+    D(x) = 0.5+atan((RigorousInvariantMeasures.sinpi(2*x)-r*sin(ϕ))/(RigorousInvariantMeasures.cospi(2*x)-r*cos(ϕ)))/pi
+
+
+    function T(x; c)
+        return 2 * x + c * RigorousInvariantMeasures.sinpi(2 * x) +
+        sqrt(IntervalArithmetic.interval(2)) / 2
+    end
+    c = 1 / (2 * IntervalArithmetic.interval(pi)) - 1 / 16
+    FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 32768)
+    P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> T(x; c = c))
+    return P
+end
 
 import BallArithmetic
 
-# function convert_matrix(P)
-#     midI = IntervalArithmetic.mid
-#     radI = IntervalArithmetic.radius
-#     midP = midI.(real.(P.L)) + im * midI.(imag.(P.L))
-#     radP = setrounding(Float64, RoundUp) do
-#         return sqrt.(radI.(real.(P.L))^2 + radI.(imag.(P.L))^2)
-#     end
-#     return BallArithmetic.BallMatrix(midP, radP)
-# end
+function convert_matrix(P)
+    midI = IntervalArithmetic.mid
+    radI = IntervalArithmetic.radius
+    midP = midI.(real.(P.L)) + im * midI.(imag.(P.L))
+    radP = setrounding(Float64, RoundUp) do
+        return sqrt.(radI.(real.(P.L))^2 + radI.(imag.(P.L))^2)
+    end
+    return BallArithmetic.BallMatrix(midP, radP)
+end
 
 using LinearAlgebra
 
@@ -53,8 +70,9 @@ end
 
 using JLD
 
-export prepare_and_output
-function prepare_and_output(K, filename = "ArnoldMatrixSchur$K.jld")
+export prepare_and_output_Arnold, prepare_and_output_Blaschke
+ 
+function prepare_and_output_Arnold(K, filename = "ArnoldMatrixSchur$K.jld")
     P = ExperimentsPseudospectra.convert_matrix(ExperimentsPseudospectra.build_matrix_arnold(256))
     S, errF, errT, norm_Z, norm_Z_inv = compute_schur_and_error(P)
     jldopen(filename, "w") do file
