@@ -8,3 +8,4 @@ Manifest.toml
 *.jld
 scripts/Manifest.toml
 *.csv
+*.jld
