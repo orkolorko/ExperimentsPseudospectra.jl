@@ -1,0 +1,2 @@
+rmprocs(procs)
+close(io)

@@ -1,10 +1,10 @@
 using Distributed, ClusterManagers, FileIO
 using FileIO, Dates, CSV
 #procs = addprocs_slurm(parse(Int, ENV["SLURM_NTASKS"]))
-procs = addprocs(2)
+procs = addprocs(4)
 
 @everywhere using Pkg;
-@everywhere Pkg.activate("../")
+@everywhere Pkg.activate("../../")
 @everywhere Pkg.instantiate();
 @everywhere Pkg.precompile()
 
@@ -21,7 +21,7 @@ procs = addprocs(2)
 
 @everywhere D = load("./ArnoldMatrixSchur256.jld")
 
-include("../script_functions.jl")
+include("./script_functions.jl")
 
 S = D["S"]
 λ = 0.0
@@ -48,7 +48,7 @@ for S in sectors
     stop = S[2]
     r_pearl = S[3]
     compute_enclosure_arc(
-        D, λ, ρ, r_pearl; start_angle = π / 2, stop_angle = angle_1 - size_sec)
+        D, λ, ρ, r_pearl; start_angle = π / 2, stop_angle = angle_1 - size_sec, csvfile = "Arnold_center.csv")
 end
 
 rmprocs(procs)

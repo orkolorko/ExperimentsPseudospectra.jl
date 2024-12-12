@@ -19,13 +19,13 @@ procs = addprocs(2)
 
 @everywhere using BallArithmetic
 
-@everywhere D = load("./ArnoldMatrixSchur256.jld")
+@everywhere D = load("./BlashkeMatrixSchur512.jld")
 
-include("./script_functions.jl")
+include("../script_functions.jl")
 
 S = D["S"]
 λ = 0.0
-ρ = 0.27812055400531616
+
 
 eig1 = S.values[1]
 eig2 = S.values[2]
@@ -48,7 +48,7 @@ for S in sectors
     stop = S[2]
     r_pearl = S[3]
     compute_enclosure_arc(
-        D, λ, ρ, r_pearl; start_angle = π / 2, stop_angle = angle_1 - size_sec, csvfile = "Arnold_center.csv")
+        D, λ, ρ, r_pearl; start_angle = π / 2, stop_angle = angle_1 - size_sec)
 end
 
 rmprocs(procs)

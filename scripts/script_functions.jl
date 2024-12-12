@@ -1,17 +1,48 @@
+@inline compute_steps(ρ, r_pearl; arc = 2*pi) = ceil(Int64, (arc * ρ) / r_pearl)
+
+function submit_job(
+    λ, ρ, r_pearl, job_queue; start_angle = 0, stop_angle = 2*pi, N = compute_steps(ρ, r_pearl; arc = stop_angle-start_angle))
+    for (i, θ) in enumerate(range(; start = start_angle, stop = stop_angle, length = N))
+        # cis(x)
+        # More efficient method for exp(im*x) by using Euler's formula: cos(x) + i sin(x) = \exp(i x)
+        put!(job_queue, (i, θ,  λ + ρ * cis(θ), r_pearl))
+    end
+    return N
+end
+
+@everywhere function dowork(P, jobs, results)
+    while true
+        i,θ, c, r_pearl = take!(jobs)
+        z = BallArithmetic.Ball(c, r_pearl)
+        t = @elapsed Σ = BallArithmetic.svdbox(P - z * LinearAlgebra.I)
+        put!(results,
+            (i = i,
+                val_c = Σ[end].c,
+                val_r = Σ[end].r,
+                second_val_c = Σ[end - 1].c,
+                second_val_r = Σ[end - 1].r,
+                c = c,
+                radian = θ,
+                r_pearl = r_pearl,
+                t = t,
+                id = Distributed.myid()))
+    end
+end
+
 function compute_enclosure_arc(D, λ, ρ, r_pearl; csvfile = "", start_angle, stop_angle)
     jobs = RemoteChannel(() -> Channel{Tuple}(32))
     results = RemoteChannel(() -> Channel{NamedTuple}(32))
 
-    Ntot = ExperimentsPseudospectra.compute_steps(
-        ρ, r_pearl; arc = stop_angle - start_angle)
+    Ntot = compute_steps(ρ, r_pearl; arc = stop_angle - start_angle)
     @info "$Ntot svd need to be computed to certify the arc centered at $(λ), with radius $(ρ), with pearls of size $(r_pearl)"
     @info "with start angle $(start_angle) and stop angle $(stop_angle)"
 
-    @async ExperimentsPseudospectra.submit_job(
-        λ, ρ, r_pearl, jobs; start_angle = start_angle, stop_angle = stop_angle)
+    @async submit_job(λ, ρ, r_pearl, jobs; start_angle = start_angle, stop_angle = stop_angle)
+
+    @info "Jobs submitted to the queue"
 
     foreach(
-        pid -> remote_do(ExperimentsPseudospectra.dowork, pid, D["P"], jobs, results),
+        pid -> remote_do(dowork, pid, D["P"], jobs, results),
         workers()
     )
 
@@ -44,13 +75,6 @@ function compute_enclosure_arc(D, λ, ρ, r_pearl; csvfile = "", start_angle, st
         count += 1
 
         CSV.write(csvfile, [x]; append = isfile(csvfile))
-
-        # if count % 10000 == 0
-        #     @info min_svd
-        #     @info x.t, x.c
-        #     @info count, ((avg_time / count) * Ntot) / (3600 * length(workers()))
-        #     #@info "Done ", (1-Float64(N)/Ntot)*100, "%"
-        # end
     end
 
     @info "The minimum singular value along the arc centered at $(λ), with radius $(ρ), with pearls of size $(r_pearl) with start angle $(start_angle) and stop angle $(stop_angle) is $(min_svd), the maximum of the l2 pseudospectra is bounded by $(l2pseudo)"

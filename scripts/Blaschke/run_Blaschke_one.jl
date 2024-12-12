@@ -18,7 +18,7 @@ procs = addprocs(2)
 
 @everywhere using BallArithmetic
 
-@everywhere D = load("./ArnoldMatrixSchur256.jld")
+@everywhere D = load("./BlashkeMatrixSchur512.jld")
 
 const jobs = RemoteChannel(() -> Channel{Tuple}(32))
 const results = RemoteChannel(() -> Channel{NamedTuple}(32))
