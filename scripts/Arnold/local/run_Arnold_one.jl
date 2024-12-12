@@ -1,6 +1,8 @@
 include("setup.jl")
 
 filename = filename = "Arnold_one"
+filename*= "$datetime"
+
 
 S = D["S"]
 ρ = 0.001

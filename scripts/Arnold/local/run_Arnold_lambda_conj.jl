@@ -1,6 +1,8 @@
 include("setup.jl")
 
 filename = "Arnold_lambda_conj"
+filename*= "$datetime"
+
 
 S = D["S"]
 ρ = 0.001
