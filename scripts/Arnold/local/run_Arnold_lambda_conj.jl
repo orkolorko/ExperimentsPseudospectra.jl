@@ -14,8 +14,6 @@ r_pearl = (4.9 * 10^(-9))
 start_angle = 0
 stop_angle = 2*pi
 
-@everywhere include("script_functions.jl")
-
 compute_enclosure_arc(
         D, λ, ρ, r_pearl; start_angle = start_angle, stop_angle = stop_angle, csvfile = "$filename.csv")
 

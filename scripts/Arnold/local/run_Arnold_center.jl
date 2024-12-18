@@ -31,7 +31,7 @@ for S in sectors
     stop = S[2]
     r_pearl = S[3]
     min_svd, l2pseudo = compute_enclosure_arc(
-        D, λ, ρ, r_pearl; start_angle = π / 2, stop_angle = angle_1 - size_sec, csvfile = "$filename.csv")
+        D, λ, ρ, r_pearl; start_angle = start, stop_angle = stop, csvfile = "$filename.csv")
     push!(out, (min_svd, l2pseudo))
 end
 
