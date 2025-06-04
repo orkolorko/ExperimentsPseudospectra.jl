@@ -1,0 +1,12 @@
+┌ Info: Added 2 processes
+└ @ Main /home/isaia/Code/ExperimentsPseudospectra.jl/scripts/Arnold/local/setup.jl:16
+AMD Ryzen 5 5600 6-Core Processor: 
+          speed         user         nice          sys         idle          irq
+#1-12  3552 MHz    2594348 s    1103837 s     861064 s   45626537 s          0 s
+┌ Info: Switching to OpenBLAS with ConsistentFPCSR = 1 flag enabled, guarantees
+│         correct floating point rounding mode over all threads.
+└ @ BallArithmetic /home/isaia/.julia/packages/BallArithmetic/nPayJ/src/BallArithmetic.jl:20
+┌ Info: OpenBLAS is giving correct rounding on a (1024,1024) test matrix on 6 threads
+└ @ BallArithmetic /home/isaia/.julia/packages/BallArithmetic/nPayJ/src/BallArithmetic.jl:27
+┌ Info: ("Certifying ", -0.013192313600122296 + 0.3088016388687516im, "radius", 0.001, "radius pearl", 4.900000000000001e-9)
+└ @ Main /home/isaia/Code/ExperimentsPseudospectra.jl/scripts/Arnold/local/run_Arnold_lambda.jl:12
