@@ -3,10 +3,9 @@ include("setup.jl")
 filename = filename = "Arnold_one"
 filename*= "$datetime"
 
-
 S = D["S"]
-ρ = 0.001
-r_pearl = (4.9 * 10^(-5))
+ρ = 0.1
+r_pearl = (4.9 * 10^(-2))
 λ = 1.0
 
 @info "Certifying ", λ, "radius", ρ, "radius pearl", r_pearl

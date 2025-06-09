@@ -41,8 +41,9 @@ function compute_enclosure_arc(D, λ, ρ, r_pearl; csvfile = "", start_angle, st
 
     @info "Jobs submitted to the queue"
 
+    T = BallMatrix(D["S"].T)
     foreach(
-        pid -> remote_do(dowork, pid, D["P"], jobs, results),
+        pid -> remote_do(dowork, pid, T, jobs, results),
         workers()
     )
 

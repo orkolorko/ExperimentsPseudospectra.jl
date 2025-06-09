@@ -5,8 +5,8 @@ filename*= "$datetime"
 
 
 S = D["S"]
-ρ = 0.001
-r_pearl = (4.9 * 10^(-9))
+ρ = 0.01
+r_pearl = (4.9 * 10^(-8))
 λ = S.values[2]
 
 @info "Certifying ", λ, "radius", ρ, "radius pearl", r_pearl

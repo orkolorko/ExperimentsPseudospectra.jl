@@ -5,7 +5,7 @@ filename*= "$datetime"
 
 S = D["S"]
 λ = 0.0
-ρ = 0.27812055400531616
+ρ = 0.26
 
 eig1 = S.values[1]
 eig2 = S.values[2]
