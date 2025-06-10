@@ -1,5 +1,6 @@
 import Pkg;
 Pkg.activate(@__DIR__)
+Pkg.instantiate()
 
 using Logging, Dates, Distributed, LinearAlgebra, SlurmClusterManager, DataFrames, JLD2, CSV
 
