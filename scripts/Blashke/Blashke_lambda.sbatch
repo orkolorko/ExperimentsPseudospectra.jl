@@ -10,4 +10,4 @@ module load julia
 
 # Run the job with full optimisations. Add in --project="." if you have a
 # Project/Manifest with dependencies
-julia --project="." scripts/run_Arnold_lambda.jl
+julia --project="." run_Blashke_lambda.jl

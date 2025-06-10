@@ -1,28 +1,27 @@
-using Logging, Dates
+import Pkg;
+Pkg.activate(@__DIR__)
+
+using Logging, Dates, Distributed, LinearAlgebra, ClusterManagers, DataFrames, JLD2, CSV
 
 datetime = Dates.now()
 
-using Distributed, LinearAlgebra
+if haskey(ENV, "SLURM_NTASKS")
+    procs = addprocs_slurm(parse(Int, ENV["SLURM_NTASKS"]))
+    location = "slurm"
+else
+    procs = addprocs(4)
+    location = "local"
+end
 
-import Pkg;
-Pkg.activate(".")
+nprocs = length(procs)
 
-nprocs = 6
-procs = addprocs(nprocs)
-
-@everywhere using LinearAlgebra
-@everywhere using BallArithmetic
-@everywhere using DataFrames
-
-using JLD2, CSV
-
-@everywhere using JLD
-@everywhere D = JLD.load("../../../ArnoldMatrixSchur256.jld")
+@everywhere using LinearAlgebra, BallArithmetic, JLD
+@everywhere D = JLD.load("../../BlaschkeMatrixSchur512.jld")
 
 λ = D["S"].values[1]
 R = 0.01
 
-io = open("log_local_Arnold_$(λ)_$(R)_$datetime.txt", "w+")
+io = open("./logs/log_$(location)_Blashke_$(λ)_$(R)_$datetime.txt", "w+")
 logger = SimpleLogger(io)
 global_logger(logger)
 @info "Added $nprocs processes"
@@ -56,7 +55,7 @@ const certification_log = DataFrame(
     id = Int[]
 )
 
-include("../../script_functions_2.jl")
+include("../script_functions_2.jl")
 
 foreach(
         pid -> remote_do(dowork, pid, job_channel, result_channel),
@@ -81,8 +80,8 @@ function lo(x::Ball)
     return lo
 end
 
-JLD2.@save "certification_log_local_Arnold_$(λ)_$(R)_$datetime.jld2" certification_log
-CSV.write("certification_log_local_Arnold_$(λ)_$(R)_$datetime.csv", certification_log)
+JLD2.@save "./logs/certification_log_$(location)_Blashke_$(λ)_$(R)_$datetime.jld2" certification_log
+CSV.write("./logs/certification_log_$(location)_Blashke_$(λ)_$(R)_$datetime.csv", certification_log)
 
 @info "The smallest singular value along the arc is bounded below by $(minimum(certification_log.lo_val))"
 l2pseudo = maximum(certification_log.hi_res)
