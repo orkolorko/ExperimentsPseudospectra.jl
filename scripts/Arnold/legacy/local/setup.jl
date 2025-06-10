@@ -12,7 +12,7 @@ using Distributed, FileIO
 using FileIO, CSV
 nprocs = 8
 
-procs = addprocs(nprocs, enable_threaded_blas = true)
+procs = addprocs(nprocs, enable_threaded_blas = false)
 
 @info "Added $nprocs processes"
 Sys.cpu_summary(io)
