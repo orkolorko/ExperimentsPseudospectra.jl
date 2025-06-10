@@ -1,12 +1,12 @@
 import Pkg;
 Pkg.activate(@__DIR__)
 
-using Logging, Dates, Distributed, LinearAlgebra, ClusterManagers, DataFrames, JLD2, CSV
+using Logging, Dates, Distributed, LinearAlgebra, SlurmClusterManager, DataFrames, JLD2, CSV
 
 datetime = Dates.now()
 
 if haskey(ENV, "SLURM_NTASKS")
-    procs = addprocs_slurm(parse(Int, ENV["SLURM_NTASKS"]))
+    procs = addprocs(SlurmManager())
     location = "slurm"
 else
     procs = addprocs(4)
@@ -14,6 +14,9 @@ else
 end
 
 nprocs = length(procs)
+
+@everywhere Pkg.activate(@__DIR__)
+@everywhere Pkg.instantiate()
 
 @everywhere using LinearAlgebra, BallArithmetic, JLD
 @everywhere D = JLD.load("../../BlaschkeMatrixSchur512.jld")
