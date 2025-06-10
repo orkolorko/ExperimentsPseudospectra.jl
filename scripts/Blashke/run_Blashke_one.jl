@@ -16,6 +16,7 @@ end
 
 nprocs = length(procs)
 
+@everywhere import Pkg
 @everywhere Pkg.activate(@__DIR__)
 @everywhere Pkg.instantiate()
 
