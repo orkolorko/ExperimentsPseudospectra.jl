@@ -26,7 +26,8 @@ nprocs = length(procs)
 λ = 0.0
 R = 0.26
 
-io = open("./logs/log_$(location)_Arnold_$(λ)_$(R)_$datetime.txt", "w+")
+const filename = "./logs/log_$(location)_Arnold_$(λ)_$(R)_$datetime"
+io = open(filename*".txt", "w+")
 logger = SimpleLogger(io)
 global_logger(logger)
 @info "Added $nprocs processes"
@@ -84,6 +85,8 @@ function lo(x::Ball)
     end
     return lo
 end
+
+
 
 JLD2.@save "./logs/certification_log_$(location)_Arnold_$(λ)_$(R)_$datetime.jld2" certification_log
 CSV.write("./logs/certification_log_$(location)_Arnold_$(λ)_$(R)_$datetime.csv", certification_log)

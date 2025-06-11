@@ -26,7 +26,8 @@ nprocs = length(procs)
 λ = 1.0
 R = 0.1
 
-io = open("./logs/log_$(location)_Arnold_$(λ)_$(R)_$datetime.txt", "w+")
+const filename = "./logs/log_$(location)_Arnold_$(λ)_$(R)_$datetime"
+io = open(filename*".txt", "w+")
 logger = SimpleLogger(io)
 global_logger(logger)
 @info "Added $nprocs processes"

@@ -26,7 +26,8 @@ nprocs = length(procs)
 λ = D["S"].values[2]
 R = 0.01
 
-io = open("./logs/log_$(location)_Blashke_$(λ)_$(R)_$datetime.txt", "w+")
+const filename = "./logs/log_$(location)_Blashke_$(λ)_$(R)_$datetime"
+io = open(filename*".txt", "w+")
 logger = SimpleLogger(io)
 global_logger(logger)
 @info "Added $nprocs processes"

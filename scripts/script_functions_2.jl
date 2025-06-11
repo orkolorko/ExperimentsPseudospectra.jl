@@ -89,6 +89,9 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
                 push!(arcs, (z_a, z_b))
                 push!(certification_log, result)
             end
+            filename_processed = filename*"$processed"*".jld2"
+
+            JLD2.@save filename_processed certification_log
         end
     end
 
