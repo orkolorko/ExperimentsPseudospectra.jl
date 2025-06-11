@@ -78,7 +78,10 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
 
         processed += 1
         if processed % check_interval == 0
-            @info "Processed $processed arcs..." 
+            @info "Processed $processed arcs..."
+            @info "Length of arcs to be processed", length(arcs)
+            @info "Pending", length(pending)
+            
             flush(io)
             @debug "Processed", processed
             @debug "Waiting for pending"
