@@ -27,7 +27,51 @@ nprocs = length(procs)
 R = 0.1
 
 const filename = "./logs/log_$(location)_Blashke_$(λ)_$(R)_$datetime"
-io = open(filename*".txt", "w+")
+
+const snapshot_a = "./logs/snapshot_Blashke_$(λ)_$(R)_A.jld2"
+const snapshot_b = "./logs/snapshot_Blashke_$(λ)_$(R)_B.jld2"
+
+function get_mtime(path)
+    return isfile(path) ? stat(path).mtime : DateTime(0)
+end
+
+# Choose the most recent snapshot
+load_snapshot = if isfile(snapshot_a) && isfile(snapshot_b)
+    get_mtime(snapshot_a) > get_mtime(snapshot_b) ? snapshot_a : snapshot_b
+elseif isfile(snapshot_a)
+    snapshot_a
+elseif isfile(snapshot_b)
+    snapshot_b
+else
+    nothing
+end
+
+if load_snapshot !== nothing
+    @info "Loading from previous snapshot: $load_snapshot"
+    @load load_snapshot arcs cache certification_log
+else
+    @info "No previous snapshot found. Starting fresh."
+    # Initialize fresh variables
+
+    N = 128
+    θs = range(0, 2π, length = N + 1)[1:(end - 1)]
+    zs = λ .+ R .* exp.(1im .* θs)
+    arcs = [(zs[i], zs[mod1(i + 1, N)]) for i in 1:N]
+    cache = Dict{ComplexF64, Any}()
+    certification_log = DataFrame(
+        i = Int[],
+        val = Ball{Float64, Float64}[],
+        lo_val = Float64[],
+        res = Ball{Float64, Float64}[],
+        hi_res = Float64[],
+        second_val = Ball{Float64, Float64}[],
+        z = ComplexF64[],
+        t = Float64[],
+        id = Int[]
+    )
+end
+
+io = open(filename * ".txt", "w+")
 logger = SimpleLogger(io)
 global_logger(logger)
 @info "Added $nprocs processes"
@@ -46,55 +90,37 @@ N = size(D["P"])[1]
 
 @everywhere const T_global = BallMatrix(D["S"].T)
 
-const job_channel = RemoteChannel(()->Channel{Tuple{Int, ComplexF64}}(1024))
-const result_channel = RemoteChannel(()->Channel{NamedTuple}(1024))
+const job_channel = RemoteChannel(() -> Channel{Tuple{Int, ComplexF64}}(1024))
+const result_channel = RemoteChannel(() -> Channel{NamedTuple}(1024))
 
-const certification_log = DataFrame(
-    i = Int[],
-    val = Ball{Float64, Float64}[],
-    lo_val = Float64[],
-    res = Ball{Float64, Float64}[],
-    hi_res = Float64[],
-    second_val = Ball{Float64, Float64}[],
-    z = ComplexF64[],
-    t = Float64[],
-    id = Int[]
-)
-
-include("../script_functions_2.jl")
+const certification_log = include("../script_functions_2.jl")
 
 foreach(
-        pid -> remote_do(dowork, pid, job_channel, result_channel),
-        workers()
-    )
+    pid -> remote_do(dowork, pid, job_channel, result_channel),
+    workers()
+)
 
-N = 128
-θs = range(0, 2π, length = N + 1)[1:(end - 1)]
-zs = λ .+ R .* exp.(1im .* θs)
-arcs = [(zs[i], zs[mod1(i + 1, N)]) for i in 1:N]
-cache = Dict{ComplexF64, Any}()
-
-@info "Certifying a circle of radius $R around $λ, initial partition in $N arcs"
+@info "Certifying a circle of radius $R around $λ"
 
 #@info arcs
 adaptive_arcs!(arcs, cache, 0.1)
 
 function lo(x::Ball)
     lo = setrounding(Float64, RoundUp) do
-            return x.c - x.r
+        return x.c - x.r
     end
     return lo
 end
 
 JLD2.@save "./logs/certification_log_$(location)_Blashke_$(λ)_$(R)_$datetime.jld2" certification_log
-CSV.write("./logs/certification_log_$(location)_Blashke_$(λ)_$(R)_$datetime.csv", certification_log)
+CSV.write("./logs/certification_log_$(location)_Blashke_$(λ)_$(R)_$datetime.csv",
+    certification_log)
 
 @info "The smallest singular value along the arc is bounded below by $(minimum(certification_log.lo_val))"
 l2pseudo = maximum(certification_log.hi_res)
 @info "The resolvent norm for the Schur matrix in l2 norm is bounded above by $(l2pseudo)"
 
 bound_res_original = setrounding(Float64, RoundUp) do
-    
     norm_Z_sup = (norm_Z - 1).c + (norm_Z - 1).r
     norm_Z_inv_sup = (norm_Z_inv - 1).c + (norm_Z_inv - 1).r
 

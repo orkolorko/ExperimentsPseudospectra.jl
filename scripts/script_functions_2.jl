@@ -43,7 +43,7 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
     processed = 0
     check_interval = 100
 
-    toggle = true
+    cycle = true
     @debug "Running, initial length arcs", length(arcs)
 
     while !isempty(arcs)
@@ -95,15 +95,8 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
                 push!(arcs, (z_a, z_b))
                 push!(certification_log, result)
             end
-            if toggle
-                filename_processed = filename*"_A.jld2"
-                toggle = false
-            else
-                filename_processed = filename*"_B.jld2"
-                toggle = true
-            end
-
-            JLD2.@save filename_processed certification_log
+            JLD2.@save (cycle ? snapshot_a : snapshot_b) arcs cache certification_log
+            cycle = !cycle
         end
     end
 
