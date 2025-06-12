@@ -49,7 +49,7 @@ end
 
 if load_snapshot !== nothing
     @info "Loading from previous snapshot: $load_snapshot"
-    @load load_snapshot arcs cache certification_log
+    JLD2.@load load_snapshot arcs cache certification_log
 else
     @info "No previous snapshot found. Starting fresh."
     # Initialize fresh variables
