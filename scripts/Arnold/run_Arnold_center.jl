@@ -21,7 +21,7 @@ nprocs = length(procs)
 @everywhere Pkg.instantiate()
 
 @everywhere using LinearAlgebra, BallArithmetic, JLD
-@everywhere D = JLD.load("../../ArnoldMatrixSchur256.jld")
+@everywhere D = JLD.load("../../ArnoldMatrixSchur128.jld2")
 
 λ = 0.0
 R = 0.26

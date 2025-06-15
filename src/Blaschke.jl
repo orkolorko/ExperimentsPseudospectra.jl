@@ -1,21 +1,17 @@
+using IntervalArithmetic
+
 function build_matrix_blaschke(K)
-    r = IntervalArithmetic.interval(9)/10
-    ϕ = IntervalArithmetic.interval(π)/4
+    r = sqrt(interval(2))*(interval(3)/8) 
+    ϕ = interval(π) / 8
 
     D(x) = 0.5+atan((RigorousInvariantMeasures.sinpi(2*x)-r*sin(ϕ))/(RigorousInvariantMeasures.cospi(2*x)-r*cos(ϕ)))/pi
 
-
-    function T(x; c)
-        return 2 * x + c * RigorousInvariantMeasures.sinpi(2 * x) +
-        sqrt(IntervalArithmetic.IntervalArithmetic.interval(2)) / 2
-    end
-    c = 1 / (2 * IntervalArithmetic.interval(pi)) - 1 / 16
     FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 32768)
-    P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> T(x; c = c))
+    P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> D(x))
     return P
 end
 
-function prepare_and_output_Blaschke(K, filename = "BlaschkeMatrixSchur$K.jld")
+function prepare_and_output_Blaschke(K, filename = "BlaschkeMatrixSchur$K.jld2")
     P = ExperimentsPseudospectra.convert_matrix(ExperimentsPseudospectra.build_matrix_blaschke(K))
     S, errF, errT, norm_Z, norm_Z_inv = compute_schur_and_error(P)
     jldopen(filename, "w") do file

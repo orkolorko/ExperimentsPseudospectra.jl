@@ -21,7 +21,7 @@ nprocs = length(procs)
 @everywhere Pkg.instantiate()
 
 @everywhere using LinearAlgebra, BallArithmetic, JLD
-@everywhere D = JLD.load("../../BlaschkeMatrixSchur512.jld")
+@everywhere D = JLD.load("../../BlaschkeMatrixSchur128.jld2")
 
 λ = 1.0
 R = 0.1

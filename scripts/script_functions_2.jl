@@ -41,8 +41,8 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
     id_counter = 1
     i = 1
     processed = 0
-    check_interval = 100
-
+    check_interval = 1000
+    
     cycle = true
     @debug "Running, initial length arcs", length(arcs)
 
