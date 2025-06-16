@@ -6,7 +6,7 @@ function build_matrix_blaschke(K)
 
     D(x) = 0.5+atan((RigorousInvariantMeasures.sinpi(2*x)-r*sin(ϕ))/(RigorousInvariantMeasures.cospi(2*x)-r*cos(ϕ)))/pi
 
-    FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 32768)
+    FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 1048576)
     P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> D(x))
     return P
 end

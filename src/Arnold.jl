@@ -5,7 +5,7 @@ function build_matrix_arnold(K)
     end
     b = 5/64+1/128+1/256
     c = 1 / (2 * IntervalArithmetic.interval(pi)) - b
-    FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 32768)
+    FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 1048576)
     P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> T(x; c = c))
     return P
 end
