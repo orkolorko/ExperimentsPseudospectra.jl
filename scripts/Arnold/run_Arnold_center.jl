@@ -102,8 +102,11 @@ foreach(
 
 @info "Certifying a circle of radius $R around $λ"
 
+η = 0.5
+@info "Size of balls < σ_min*$η"
+
 #@info arcs
-adaptive_arcs!(arcs, cache, 0.1)
+adaptive_arcs!(arcs, cache, η)
 
 function lo(x::Ball)
     lo = setrounding(Float64, RoundUp) do
@@ -121,15 +124,8 @@ CSV.write("./logs/certification_log_$(location)_Arnold_$(λ)_$(R)_$datetime.csv"
 l2pseudo = maximum(certification_log.hi_res)
 @info "The resolvent norm for the Schur matrix in l2 norm is bounded above by $(l2pseudo)"
 
-bound_res_original = setrounding(Float64, RoundUp) do
-    norm_Z_sup = (norm_Z - 1).c + (norm_Z - 1).r
-    norm_Z_inv_sup = (norm_Z_inv - 1).c + (norm_Z_inv - 1).r
+bound = bound_res_original(l2pseudo, η, norm_Z, norm_Z_inv, errF, errT, N)
 
-    ϵ = max(max(errF, errT), max(norm_Z_sup, norm_Z_inv_sup))
-    @info "The ϵ in the Schur theorems $ϵ"
-    return (2 * (1 + ϵ^2) * l2pseudo * sqrt(N)) / (1 - 2 * ϵ * (1 + ϵ^2) * l2pseudo)
-end
-
-@info "The l1 resolvent norm for the original discretized operator is bounded above by $bound_res_original"
+@info "The l1 resolvent norm for the original discretized operator is bounded above by $bound"
 
 rmprocs(procs)

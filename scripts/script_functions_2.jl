@@ -117,3 +117,16 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
         adaptive_arcs!(arcs, cache, η)
     end
 end
+
+function bound_res_original(l2pseudo, η, norm_Z, norm_Z_inv, errF, errT, N) 
+    bound = setrounding(Float64, RoundUp) do
+    l2pseudo = l2pseudo * 1/(1-η) 
+    norm_Z_sup = (norm_Z - 1).c + (norm_Z - 1).r
+    norm_Z_inv_sup = (norm_Z_inv - 1).c + (norm_Z_inv - 1).r
+
+    ϵ = max(max(errF, errT), max(norm_Z_sup, norm_Z_inv_sup))
+    @info "The ϵ in the Schur theorems $ϵ"
+    return (2 * (1 + ϵ^2) * l2pseudo * sqrt(N)) / (1 - 2 * ϵ * (1 + ϵ^2) * l2pseudo)
+    end
+    return bound
+end
