@@ -41,6 +41,7 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
     id_counter = 1
     i = 1
     processed = 0
+    new = 0
     check_interval = 1000
     
     cycle = true
@@ -75,6 +76,7 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
             deleteat!(arcs, i)
             insert!(arcs, i, (z_m, z_b))
             insert!(arcs, i, (z_a, z_m))
+            new += 1
         end
 
         processed += 1
@@ -82,7 +84,9 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
             @info "Processed $processed arcs..."
             @info "Length of arcs to be processed", length(arcs)
             @info "Pending", length(pending)
-            
+            @info "Proportion of new arcs", new/check_interval
+            new = 0
+
             flush(io)
             @debug "Processed", processed
             @debug "Waiting for pending"
@@ -95,8 +99,7 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
                 push!(arcs, (z_a, z_b))
                 push!(certification_log, result)
             end
-            JLD2.@save (cycle ? snapshot_a : snapshot_b) arcs cache certification_log
-            cycle = !cycle
+            cycle = save_snapshot!(arcs, cache, certification_log, snapshot, cycle)
         end
     end
 
@@ -129,4 +132,38 @@ function bound_res_original(l2pseudo, η, norm_Z, norm_Z_inv, errF, errT, N)
     return (2 * (1 + ϵ^2) * l2pseudo * sqrt(N)) / (1 - 2 * ϵ * (1 + ϵ^2) * l2pseudo)
     end
     return bound
+end
+
+function choose_snapshot_to_load(basepath::String)
+    files = [basepath * "_A.jld2", basepath * "_B.jld2"]
+    valid_files = filter(isfile, files)
+    if isempty(valid_files)
+        return nothing  # No prior snapshot found
+    end
+    # Sort by modification time descending
+    sorted = sort(valid_files, by = f -> stat(f).mtime, rev = true)
+    try
+        snapshot = JLD2.load(sorted[1])
+        return snapshot
+    catch e
+        @warn "Could not load snapshot file $(sorted[1]), possibly corrupted. Trying backup." exception=(e, catch_backtrace())
+        if length(sorted) > 1
+            try
+                snapshot = JLD2.load(sorted[2])
+                return snapshot
+            catch e
+                @warn "Both snapshot files failed to load." exception=(e, catch_backtrace())
+                return nothing
+            end
+        else
+            return nothing
+        end
+    end
+end
+
+
+function save_snapshot!(arcs, cache, log, basepath::String, toggle::Bool)
+    filename = basepath * (toggle ? "_A.jld2" : "_B.jld2")
+    JLD2.@save filename arcs cache log
+    return !toggle  # Flip toggle
 end

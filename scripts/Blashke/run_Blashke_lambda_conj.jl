@@ -27,27 +27,13 @@ nprocs = length(procs)
 R = 0.01
 
 const filename = "./logs/log_$(location)_Blashke_$(λ)_$(R)_$datetime"
-const snapshot_a = "./logs/snapshot_Blashke_$(λ)_$(R)_A.jld2"
-const snapshot_b = "./logs/snapshot_Blashke_$(λ)_$(R)_B.jld2"
+const snapshot = "./logs/snapshot_Blashke_$(λ)_$(R)"
 
-function get_mtime(path)
-    return isfile(path) ? stat(path).mtime : DateTime(0)
-end
-
-# Choose the most recent snapshot
-load_snapshot = if isfile(snapshot_a) && isfile(snapshot_b)
-    get_mtime(snapshot_a) > get_mtime(snapshot_b) ? snapshot_a : snapshot_b
-elseif isfile(snapshot_a)
-    snapshot_a
-elseif isfile(snapshot_b)
-    snapshot_b
-else
-    nothing
-end
+# Choose the most recent working snapshot
+load_snapshot = choose_snapshot_to_load(snapshot)
 
 if load_snapshot !== nothing
-    @info "Loading from previous snapshot: $load_snapshot"
-    JLD2.@load load_snapshot arcs cache certification_log
+    arcs, cache, certification_log =  load_snapshot
 else
     @info "No previous snapshot found. Starting fresh."
     # Initialize fresh variables
