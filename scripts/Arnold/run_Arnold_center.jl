@@ -30,6 +30,8 @@ const filename = "./logs/log_$(location)_Arnold_$(λ)_$(R)_$datetime"
 
 const snapshot = "./logs/snapshot_Arnold_$(λ)_$(R)"
 
+include("../script_functions_2.jl")
+
 # Choose the most recent working snapshot
 load_snapshot = choose_snapshot_to_load(snapshot)
 
@@ -78,8 +80,6 @@ N = size(D["P"])[1]
 
 const job_channel = RemoteChannel(() -> Channel{Tuple{Int, ComplexF64}}(1024))
 const result_channel = RemoteChannel(() -> Channel{NamedTuple}(1024))
-
-include("../script_functions_2.jl")
 
 foreach(
     pid -> remote_do(dowork, pid, job_channel, result_channel),
