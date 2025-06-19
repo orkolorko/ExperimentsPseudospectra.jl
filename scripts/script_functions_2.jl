@@ -7,14 +7,14 @@
         t = @elapsed Σ = BallArithmetic.svdbox(T_global - bz * LinearAlgebra.I)
 
         val = Σ[end]
-        res = 1/val
+        res = 1 / val
 
         lo_val = setrounding(Float64, RoundDown) do
-                return val.c - val.r
+            return val.c - val.r
         end
 
         hi_res = setrounding(Float64, RoundUp) do
-                return res.c + res.r
+            return res.c + res.r
         end
 
         put!(results,
@@ -35,20 +35,18 @@ end
 # --- Adaptive method ---
 function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
         cache::Dict{ComplexF64, Any},
-        η::Float64)
-
-    pending = Dict{Int, Tuple{ComplexF64, ComplexF64}}()
-    id_counter = 1
+        pending::Dict{Int, Tuple{ComplexF64, ComplexF64}},
+        id_counter,
+        η::Float64;
+        check_interval = 1000)
     i = 1
     processed = 0
     new = 0
-    check_interval = 1000
-    
+
     cycle = true
-    @debug "Running, initial length arcs", length(arcs)
+    @info "Running, initial length arcs", length(arcs)
 
     while !isempty(arcs)
-            
         z_a, z_b = arcs[i]
         if haskey(cache, z_a)
             σ_a = cache[z_a][1]
@@ -84,7 +82,7 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
             @info "Processed $processed arcs..."
             @info "Length of arcs to be processed", length(arcs)
             @info "Pending", length(pending)
-            @info "Proportion of new arcs", new/check_interval
+            @info "Proportion of new arcs", new / check_interval
             new = 0
 
             flush(io)
@@ -99,7 +97,7 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
                 push!(arcs, (z_a, z_b))
                 push!(certification_log, result)
             end
-            cycle = save_snapshot!(arcs, cache, certification_log, snapshot, cycle)
+            cycle = save_snapshot!(arcs, cache, certification_log, pending, snapshot, cycle)
         end
     end
 
@@ -117,19 +115,19 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
     @debug "After initial process", length(arcs)
     # Recursively refine new arcs
     if !isempty(arcs)
-        adaptive_arcs!(arcs, cache, η)
+        adaptive_arcs!(arcs, cache, pending, id_counter, η; check_interval)
     end
 end
 
-function bound_res_original(l2pseudo, η, norm_Z, norm_Z_inv, errF, errT, N) 
+function bound_res_original(l2pseudo, η, norm_Z, norm_Z_inv, errF, errT, N)
     bound = setrounding(Float64, RoundUp) do
-    l2pseudo = l2pseudo * 1/(1-η) 
-    norm_Z_sup = (norm_Z - 1).c + (norm_Z - 1).r
-    norm_Z_inv_sup = (norm_Z_inv - 1).c + (norm_Z_inv - 1).r
+        l2pseudo = l2pseudo * 1 / (1 - η)
+        norm_Z_sup = (norm_Z - 1).c + (norm_Z - 1).r
+        norm_Z_inv_sup = (norm_Z_inv - 1).c + (norm_Z_inv - 1).r
 
-    ϵ = max(max(errF, errT), max(norm_Z_sup, norm_Z_inv_sup))
-    @info "The ϵ in the Schur theorems $ϵ"
-    return (2 * (1 + ϵ^2) * l2pseudo * sqrt(N)) / (1 - 2 * ϵ * (1 + ϵ^2) * l2pseudo)
+        ϵ = max(max(errF, errT), max(norm_Z_sup, norm_Z_inv_sup))
+        @info "The ϵ in the Schur theorems $ϵ"
+        return (2 * (1 + ϵ^2) * l2pseudo * sqrt(N)) / (1 - 2 * ϵ * (1 + ϵ^2) * l2pseudo)
     end
     return bound
 end
@@ -146,7 +144,8 @@ function choose_snapshot_to_load(basepath::String)
         snapshot = JLD2.load(sorted[1])
         return snapshot
     catch e
-        @warn "Could not load snapshot file $(sorted[1]), possibly corrupted. Trying backup." exception=(e, catch_backtrace())
+        @warn "Could not load snapshot file $(sorted[1]), possibly corrupted. Trying backup." exception=(
+            e, catch_backtrace())
         if length(sorted) > 1
             try
                 snapshot = JLD2.load(sorted[2])
@@ -161,9 +160,8 @@ function choose_snapshot_to_load(basepath::String)
     end
 end
 
-
-function save_snapshot!(arcs, cache, log, basepath::String, toggle::Bool)
+function save_snapshot!(arcs, cache, log, pending, basepath::String, toggle::Bool)
     filename = basepath * (toggle ? "_A.jld2" : "_B.jld2")
-    JLD2.@save filename arcs cache log
+    JLD2.@save filename arcs cache log pending
     return !toggle  # Flip toggle
 end

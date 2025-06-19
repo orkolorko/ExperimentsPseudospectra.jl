@@ -38,7 +38,10 @@ include("../script_functions_2.jl")
 load_snapshot = choose_snapshot_to_load(snapshot)
 
 if load_snapshot !== nothing
-    arcs, cache, certification_log =  load_snapshot
+    arcs = load_snapshot["arcs"]
+    cache = load_snapshot["cache"]
+    certification_log = load_snapshot["log"]
+    pending = load_snapshot["pending"]
 else
     @info "No previous snapshot found. Starting fresh."
     # Initialize fresh variables
@@ -59,6 +62,7 @@ else
         t = Float64[],
         id = Int[]
     )
+    pending = Dict{Int, Tuple{ComplexF64, ComplexF64}}()
 end
 
 io = open(filename*".txt", "w+")
@@ -95,8 +99,13 @@ foreach(
 η = 0.5
 @info "Size of balls < σ_min*$η"
 
+id_counter = maximum(collect(keys(pending)); init=0) + 1
+for (i, (z_a, z_b)) in pending
+    put!(job_channel, (i, z_a))
+end
+
 #@info arcs
-adaptive_arcs!(arcs, cache, η)
+adaptive_arcs!(arcs, cache, pending, id_counter, η)
 
 function lo(x::Ball)
     lo = setrounding(Float64, RoundUp) do
