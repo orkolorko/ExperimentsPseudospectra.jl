@@ -94,7 +94,10 @@ foreach(
 η = 0.5
 @info "Size of balls < σ_min*$η"
 
+
 id_counter = maximum(collect(keys(pending)); init=0) + 1
+@info "Pending from snapshot", length(pending)
+
 for (i, (z_a, z_b)) in pending
     put!(job_channel, (i, z_a))
 end
