@@ -29,7 +29,7 @@ N = 128
 
 const filename = "./logs/log_$(location)_Arnold_$(λ)_$(R)_$datetime"
 
-const snapshot = "./logs/snapshot_Arnold_$(λ)_$(R)"
+const snapshot = "./logs/new_snapshot_Arnold_$(λ)_$(R)"
 
 include("../script_functions_2.jl")
 
