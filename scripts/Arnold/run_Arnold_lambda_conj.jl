@@ -108,6 +108,7 @@ end
 
 flush(io)
 @info "Entering the adaptive_arcs function"
+flush(io)
 adaptive_arcs!(arcs, cache, pending, id_counter, η)
 
 function lo(x::Ball)

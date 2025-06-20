@@ -39,10 +39,24 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
         id_counter::Int,
         η::Float64;
         check_interval = 1000)
-
     cycle = true
-    @info "Starting adaptive refinement"
-    
+    @info "Starting adaptive refinement, arcs, $(length(arcs)), pending, $(length(pending))"
+    while !isempty(pending)
+        if isready(result_channel)
+            result = take!(result_channel)
+            z = result.z
+            cache[z] = (result.val, result.second_val)
+            z_a, z_b = pending[result.i]
+            delete!(pending, result.i)
+            push!(arcs, (z_a, z_b))
+            push!(certification_log, result)
+        else
+            sleep(0.1)
+        end
+    end
+    @info "Waited for all pending to be computed, arcs, $(length(arcs)), pending, $(length(pending))"
+
+    flush(io)
     while !isempty(arcs)
         processed = 0
         new = 0
@@ -92,7 +106,8 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
                     push!(arcs, (z_a, z_b))
                     push!(certification_log, result)
                 end
-                cycle = save_snapshot!(arcs, cache, certification_log, pending, snapshot, cycle)
+                cycle = save_snapshot!(
+                    arcs, cache, certification_log, pending, snapshot, cycle)
             end
         end
 
@@ -117,7 +132,6 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
 
     @info "Adaptive refinement complete"
 end
-
 
 function bound_res_original(l2pseudo, η, norm_Z, norm_Z_inv, errF, errT, N)
     bound = setrounding(Float64, RoundUp) do
