@@ -41,6 +41,9 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
         check_interval = 1000)
     cycle = true
     @info "Starting adaptive refinement, arcs, $(length(arcs)), pending, $(length(pending))"
+    flush(io)
+
+
     while !isempty(pending)
         if isready(result_channel)
             result = take!(result_channel)

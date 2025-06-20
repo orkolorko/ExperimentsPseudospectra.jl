@@ -25,7 +25,7 @@ nprocs = length(procs)
 
 
 λ = D["S"].values[2]
-R = 0.01
+R = 0.001
 
 const filename = "./logs/log_$(location)_Arnold_$(λ)_$(R)_$datetime"
 
