@@ -1,10 +1,9 @@
 function build_matrix_arnold(K)
     function T(x; c)
-        return 2 * x + c * RigorousInvariantMeasures.sinpi(2 * x) +
-        sqrt(IntervalArithmetic.interval(2)) / 2
+        return 2 * x + c * RigorousInvariantMeasures.sinpi(2 * x) + 0.25
     end
     b = 5/64+1/128+1/256
-    c = 1 / (2 * IntervalArithmetic.interval(pi)) - b
+    c = (1 / (2 * IntervalArithmetic.interval(pi)) - b)
     FourierBasis = RigorousInvariantMeasures.FourierAdjoint(K, 1048576)
     P = RigorousInvariantMeasures.DiscretizedOperator(FourierBasis, x -> T(x; c = c))
     return P
