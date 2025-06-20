@@ -162,6 +162,7 @@ end
 
 function save_snapshot!(arcs, cache, log, pending, basepath::String, toggle::Bool)
     filename = basepath * (toggle ? "_A.jld2" : "_B.jld2")
+    @info "Saved in filename, arcs $(length(arcs)), pending $(length(pending))"
     JLD2.@save filename arcs cache log pending
     return !toggle  # Flip toggle
 end
