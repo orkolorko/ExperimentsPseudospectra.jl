@@ -103,7 +103,7 @@ for (i, (z_a, z_b)) in pending
 end
 
 #@info arcs
-adaptive_arcs!(arcs, cache, pending, id_counter, η; check_interval = 10)
+adaptive_arcs!(arcs, cache, pending, η; check_interval = 10)
 
 function lo(x::Ball)
     lo = setrounding(Float64, RoundUp) do

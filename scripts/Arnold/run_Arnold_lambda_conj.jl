@@ -109,7 +109,7 @@ end
 flush(io)
 @info "Entering the adaptive_arcs function"
 flush(io)
-adaptive_arcs!(arcs, cache, pending, id_counter, η)
+adaptive_arcs!(arcs, cache, pending, η)
 
 function lo(x::Ball)
     lo = setrounding(Float64, RoundUp) do

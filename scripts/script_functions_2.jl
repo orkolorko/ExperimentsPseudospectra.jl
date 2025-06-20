@@ -36,13 +36,18 @@ end
 function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
         cache::Dict{ComplexF64, Any},
         pending::Dict{Int, Tuple{ComplexF64, ComplexF64}},
-        id_counter::Int,
         η::Float64;
         check_interval = 1000)
     cycle = true
     @info "Starting adaptive refinement, arcs, $(length(arcs)), pending, $(length(pending))"
     flush(io)
 
+    id_counter = maximum(collect(keys(pending)); init = 0) + 1
+    @info "Pending from snapshot", length(pending), id_counter
+
+    for (i, (z_a, z_b)) in pending
+        put!(job_channel, (i, z_a))
+    end
 
     while !isempty(pending)
         if isready(result_channel)
@@ -54,6 +59,8 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
             push!(arcs, (z_a, z_b))
             push!(certification_log, result)
         else
+            @info "Waiting for pending", length(pending)
+            flush(io)
             sleep(0.1)
         end
     end
@@ -126,6 +133,8 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
                 push!(arcs, (z_a, z_b))
                 push!(certification_log, result)
             else
+                @info "Waiting for pending", length(pending)
+                flush(io)
                 sleep(0.1)
             end
         end

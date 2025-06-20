@@ -94,16 +94,8 @@ foreach(
 η = 0.5
 @info "Size of balls < σ_min*$η"
 
-
-id_counter = maximum(collect(keys(pending)); init=0) + 1
-@info "Pending from snapshot", length(pending)
-
-for (i, (z_a, z_b)) in pending
-    put!(job_channel, (i, z_a))
-end
-
 #@info arcs
-adaptive_arcs!(arcs, cache, pending, id_counter, η)
+adaptive_arcs!(arcs, cache, pending, η)
 
 function lo(x::Ball)
     lo = setrounding(Float64, RoundUp) do
