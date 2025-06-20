@@ -59,10 +59,10 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
             push!(arcs, (z_a, z_b))
             push!(certification_log, result)
         else
-            @info "Waiting for pending", length(pending)
-            flush(io)
             sleep(0.1)
         end
+        @info "Waiting for pending", length(pending)
+        flush(io)
     end
     @info "Waited for all pending to be computed, arcs, $(length(arcs)), pending, $(length(pending))"
 
