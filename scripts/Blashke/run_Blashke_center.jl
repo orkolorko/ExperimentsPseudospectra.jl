@@ -43,7 +43,7 @@ else
     @info "No previous snapshot found. Starting fresh."
     # Initialize fresh variables
 
-    N = 128
+    N = 1024
     θs = range(0, 2π, length = N + 1)[1:(end - 1)]
     zs = λ .+ R .* exp.(1im .* θs)
     arcs = [(zs[i], zs[mod1(i + 1, N)]) for i in 1:N]
