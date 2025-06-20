@@ -76,7 +76,7 @@ errF = D["errF"]
 errT = D["errT"]
 norm_Z = D["norm_Z"]
 norm_Z_inv = D["norm_Z_inv"]
-@info "E_M", errF
+@info "E_F", errF
 @info "E_T", errT
 @info "norm_Z", norm_Z
 @info "norm_Z_inv", norm_Z_inv
@@ -106,7 +106,8 @@ for (i, (z_a, z_b)) in pending
     put!(job_channel, (i, z_a))
 end
 
-#@info arcs
+flush(io)
+@info "Entering the adaptive_arcs function"
 adaptive_arcs!(arcs, cache, pending, id_counter, η)
 
 function lo(x::Ball)
