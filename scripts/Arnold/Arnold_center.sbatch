@@ -2,7 +2,7 @@
 #SBATCH --time=48:00:00
 #SBATCH --ntasks=128
 #SBATCH --cpus-per-task=1
-#SBATCH --mem-per-cpu=16G
+#SBATCH --mem-per-cpu=8G
 #SBATCH --partition=gpu
 
 # Makes the julia binary available. This will depend on your HPC setup
