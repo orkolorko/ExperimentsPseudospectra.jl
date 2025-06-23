@@ -61,8 +61,6 @@ function adaptive_arcs!(arcs::Vector{Tuple{ComplexF64, ComplexF64}},
         else
             sleep(0.1)
         end
-        @info "Waiting for pending", length(pending)
-        flush(io)
     end
     @info "Waited for all pending to be computed, arcs, $(length(arcs)), pending, $(length(pending))"
 
