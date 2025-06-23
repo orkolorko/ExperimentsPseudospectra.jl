@@ -24,7 +24,7 @@ nprocs = length(procs)
 @everywhere D = JLD2.load("../../BlaschkeMatrixSchur128.jld2")
 
 λ = 0.0
-R = 0.35
+R = 0.52
 
 const filename = "./logs/log_$(location)_Blashke_$(λ)_$(R)_$datetime"
 const snapshot = "./logs/new_snapshot_Blashke_$(λ)_$(R)"
@@ -96,10 +96,6 @@ foreach(
 
 id_counter = maximum(collect(keys(pending)); init=0) + 1
 @info "Pending from snapshot", length(pending)
-
-for (i, (z_a, z_b)) in pending
-    put!(job_channel, (i, z_a))
-end
 
 #@info arcs
 adaptive_arcs!(arcs, cache, pending, η)
