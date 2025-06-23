@@ -24,8 +24,8 @@ nprocs = length(procs)
 @everywhere D = JLD2.load("../../ArnoldMatrixSchur128.jld2")
 
 λ = D["S"].values[1]
-R = 0.01
-N = 128
+R = 0.001
+N = 1024
 
 const filename = "./logs/log_$(location)_Arnold_$(λ)_$(R)_$datetime"
 
