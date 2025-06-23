@@ -24,7 +24,7 @@ nprocs = length(procs)
 @everywhere D = JLD2.load("../../BlaschkeMatrixSchur128.jld2")
 
 λ = 0.0
-R = 0.52
+R = 0.51
 
 const filename = "./logs/log_$(location)_Blashke_$(λ)_$(R)_$datetime"
 const snapshot = "./logs/new_snapshot_Blashke_$(λ)_$(R)"
