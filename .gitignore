@@ -11,3 +11,4 @@ scripts/Manifest.toml
 *.jld
 *.jld2
 settings.json
+*.pdf
